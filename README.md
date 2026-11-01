@@ -1,4 +1,4 @@
-﻿# Ran-King
+﻿# Tee Best Ran-King
 Ranking video maker. Runs fully in the browser: upload clips, rank them, style the title, export a vertical video.
 
 ## Link import (local only)
