@@ -1,0 +1,264 @@
+﻿<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ran-King — Ranking Video Maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo+Black&family=Bangers&family=Bebas+Neue&family=Montserrat:wght@800&family=Oswald:wght@700&family=Poppins:wght@800&family=Rubik:wght@800&family=Teko:wght@700&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07070c;--card:rgba(255,255,255,.05);--bd:rgba(255,255,255,.1);--fg:#f2f2f7;--mut:#8b8ba0;--a:#ffd400;--b:#ff3d81;--c:#6c5cff}
+*{box-sizing:border-box}
+body{margin:0;color:var(--fg);font:14px Manrope,system-ui,sans-serif;min-height:100vh;
+ background:radial-gradient(900px 500px at 10% -10%,#3b1d7a55,transparent),radial-gradient(800px 500px at 100% 0,#ff3d8133,transparent),var(--bg)}
+header{display:flex;align-items:center;gap:12px;padding:16px 24px}
+.logo{font:800 22px Manrope;background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;color:transparent;letter-spacing:-.5px}
+header small{color:var(--mut)}header .sp{flex:1}
+main{display:grid;grid-template-columns:320px minmax(300px,1fr) 340px;gap:16px;padding:0 24px 32px;max-width:1500px;margin:auto}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+section{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:16px;backdrop-filter:blur(12px)}
+h2{margin:0 0 12px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+h3{margin:16px 0 4px;font-size:12px;color:var(--a)}
+label{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0;color:#cfcfe0}
+input[type=text],select{width:100%;padding:8px 10px;background:#0c0c14;color:var(--fg);border:1px solid var(--bd);border-radius:8px;font:inherit}
+label input[type=text],label select{width:55%}
+input[type=range]{width:55%;accent-color:var(--b)}
+input[type=color]{width:44px;height:30px;border:2px solid var(--bd);border-radius:8px;background:none;padding:0;cursor:pointer}
+button{border:0;border-radius:10px;padding:10px 16px;font:800 14px Manrope;cursor:pointer;color:#111;background:linear-gradient(90deg,var(--a),#ff9f1c);transition:.15s}
+button:hover{transform:translateY(-1px);filter:brightness(1.1)}
+button.g{background:rgba(255,255,255,.08);color:var(--fg)}
+button.hot{background:linear-gradient(90deg,var(--b),var(--c));color:#fff;box-shadow:0 6px 24px #ff3d8155}
+#drop{border:2px dashed var(--bd);border-radius:14px;padding:22px;text-align:center;color:var(--mut);cursor:pointer;transition:.2s;margin-bottom:12px}
+#drop:hover,#drop.on{border-color:var(--a);background:#ffd40012;color:var(--fg)}
+#drop b{display:block;font-size:30px}
+.item{display:flex;gap:8px;align-items:center;background:#0c0c14;border:1px solid var(--bd);border-radius:10px;padding:6px;margin:6px 0;cursor:grab}
+.item img{width:34px;height:48px;object-fit:cover;border-radius:6px;background:#000}
+.item i{font:normal 800 18px Manrope;width:24px;text-align:center;color:var(--a)}
+.item.over{outline:2px solid var(--b)}.item.now{outline:2px solid var(--a);background:#ffd40014}
+button:disabled{opacity:.35;cursor:default;transform:none}canvas{cursor:pointer}.item button{padding:6px 10px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+canvas{width:100%;max-width:360px;aspect-ratio:9/16;background:#000;border-radius:18px;display:block;margin:auto;box-shadow:0 20px 60px #000a,0 0 0 1px var(--bd)}
+.bar{display:flex;gap:10px;justify-content:center;margin-top:14px}
+#st{color:var(--mut);margin-top:10px;text-align:center;min-height:1.3em}
+#prog{height:6px;border-radius:3px;background:#ffffff14;margin-top:10px;overflow:hidden}#prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--b))}
+.chk{justify-content:flex-start}.chk input{accent-color:var(--b)}
+</style></head><body>
+<header><span class="logo">Ran-King</span><small>ranking video maker · runs in your browser</small><span class="sp"></span></header>
+<main>
+<section>
+  <h2>1 · Clips</h2>
+  <div id="drop"><b>⬆</b>Upload videos<br><small>click or drop · MP4 / MOV / WebM · up to 60s each</small>
+    <input id="file" type="file" accept="video/*" multiple hidden></div>
+  <div class="row" id="linkrow" style="margin-bottom:12px"><input type="text" id="link" placeholder="Paste TikTok / Instagram / YT Shorts link" style="flex:1"><button class="g" id="getlink">Add</button></div>
+  <div id="list"></div>
+  <div class="row"><button class="g" id="shuffle">🔀 Shuffle</button><button class="g" id="rev">⇅ Reverse</button><button class="g" id="clear">Clear all</button></div>
+  <h3>Cover image (shown first)</h3>
+  <label>Image <input type="file" id="cover" accept="image/*"></label>
+  <label>Seconds <input type="range" id="csec" min="0.5" max="5" step="0.5" value="1.5"></label>
+</section>
+<section>
+  <h2>2 · Preview &amp; export</h2>
+  <canvas id="cv"></canvas>
+  <div id="prog"><i></i></div>
+  <div class="bar"><button class="g" id="play">▶ Play</button><button class="g" id="stop" disabled>■ Stop</button><button class="hot" id="exp">Export video</button></div>
+  <label class="chk" style="justify-content:center"><input type="checkbox" id="loop" checked> 🔁 Loop until I stop</label>
+  <small style="display:block;text-align:center;color:var(--mut)">Space = play/pause · Esc = stop · click preview = pause · click a thumbnail = play that clip</small>
+  <label style="margin-top:12px">Resolution
+    <select id="res"><option value="1">1080 × 1920 (HD)</option><option value=".667">720 × 1280</option><option value=".5">540 × 960</option></select></label>
+  <label class="chk"><input type="checkbox" id="mute"> Remove audio</label>
+  <div id="st"></div>
+</section>
+<section>
+  <h2>3 · Style</h2>
+  <h3>Title</h3>
+  <input type="text" id="title" maxlength="80" value="TOP *5* MOMENTS">
+  <small style="color:var(--mut)">Wrap words in *stars* to highlight them, or pick a color per word:</small>
+  <div id="wcs" class="row" style="margin-top:6px"></div>
+  <label>Font <select id="tf"></select></label>
+  <label>Size <input type="range" id="tsize" min="50" max="170" value="110"></label>
+  <label>Stroke <input type="range" id="tstroke" min="0" max="20" value="10"></label>
+  <label>Text color <input type="color" id="tc" value="#ffffff"></label>
+  <label>Highlight color <input type="color" id="hl" value="#ffd400"></label>
+  <label>Stroke color <input type="color" id="sc" value="#000000"></label>
+  <h3>Caption list</h3>
+  <label>Font <select id="lf"></select></label>
+  <label>Size <input type="range" id="lsize" min="26" max="64" value="44"></label>
+  <label>Text color <input type="color" id="lc" value="#ffffff"></label>
+  <label>Active color <input type="color" id="ac" value="#ffd400"></label>
+  <label class="chk"><input type="checkbox" id="rb"> Rainbow rank numbers</label>
+  <h3>Layout</h3>
+  <label class="chk"><input type="checkbox" id="fill" checked> Fill frame (crop to fit)</label>
+  <label>Video height <input type="range" id="vh" min="25" max="95" value="78"></label>
+  <label>Video top <input type="range" id="vt" min="5" max="45" value="17"></label>
+  <label>List top <input type="range" id="lt" min="5" max="90" value="21"></label>
+  <label>Background <input type="color" id="bg" value="#0f1016"></label>
+  <label>Watermark <input type="text" id="wm" placeholder="@yourname"></label>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id), cv=$('cv'), g=cv.getContext('2d'), W=1080, H=1920;
+const FONTS=['Anton','Archivo Black','Bebas Neue','Rubik','Oswald','Montserrat','Poppins','Teko','Bangers'];
+for(const s of ['tf','lf']) $(s).innerHTML=FONTS.map(f=>`<option>${f}</option>`).join('');
+$('lf').value='Archivo Black';
+const clips=[]; let cover=null, active=-1, busy=false, scale=1;
+const ac=new AudioContext(), dest=ac.createMediaStreamDestination(), spk=ac.createGain();
+spk.connect(ac.destination);
+const setSize=()=>{scale=+$('res').value;cv.width=Math.round(W*scale);cv.height=Math.round(H*scale);draw()};
+
+function thumb(v){ // first-frame thumbnail for the list
+  const c=document.createElement('canvas');c.width=68;c.height=96;
+  c.getContext('2d').drawImage(v,0,0,68,96);return c.toDataURL();
+}
+function addFiles(files){
+  for(const f of files){
+    if(!f.type.startsWith('video/')) continue;
+    const v=document.createElement('video'); v.src=URL.createObjectURL(f); v.playsInline=true; v.preload='auto'; v.muted=false;
+    v.onloadeddata=()=>{
+      if(v.duration>60){alert(f.name+' is longer than 60s');return;}
+      v.currentTime=0.1;
+      v.onseeked=()=>{v.onseeked=null;
+        const s=ac.createMediaElementSource(v); s.connect(dest); s.connect(spk);
+        clips.push({v,caption:f.name.replace(/\.[^.]+$/,'').slice(0,28),th:thumb(v)}); render();};
+    };
+    v.onerror=()=>alert("Can't read "+f.name);
+  }
+}
+function render(){
+  const l=$('list'); l.innerHTML='';
+  clips.forEach((c,i)=>{
+    const d=document.createElement('div'); d.className='item'; d.draggable=true;
+    d.innerHTML=`<i>${i+1}</i><img src="${c.th}"><input type="text" maxlength="28">`;
+    const im=d.querySelector('img'); im.title='Play this clip'; im.style.cursor='pointer'; im.onclick=()=>solo(i);
+    const inp=d.querySelector('input'); inp.value=c.caption; inp.oninput=()=>{c.caption=inp.value;draw()};
+    const x=document.createElement('button'); x.className='g'; x.textContent='✕'; x.onclick=()=>{clips.splice(i,1);render()};
+    d.append(x);
+    d.ondragstart=e=>e.dataTransfer.setData('text/rk',i);
+    d.ondragover=e=>{e.preventDefault();d.classList.add('over')};
+    d.ondragleave=()=>d.classList.remove('over');
+    d.ondrop=e=>{e.preventDefault();e.stopPropagation();const from=e.dataTransfer.getData('text/rk');if(from==='')return;clips.splice(i,0,...clips.splice(+from,1));render()};
+    l.append(d);
+  });
+  draw();
+}
+
+const font=(w,s,f)=>`${w} ${s}px "${f}",Impact,sans-serif`;
+const wc=[]; // per-word color overrides by word index
+const titleWords=()=>$('title').value.split(/\s+/).filter(Boolean);
+function buildChips(){
+  $('wcs').replaceChildren(...titleWords().map((w,i)=>{
+    const l=document.createElement('label'), c=document.createElement('input');
+    l.style.cssText='margin:0;gap:4px'; c.type='color'; c.value=wc[i]||(/\*/.test(w)?$('hl').value:$('tc').value);
+    c.oninput=()=>{wc[i]=c.value;draw()}; l.append(w.replace(/\*/g,''),c); return l;
+  }));
+}
+for(const id of ['title','tc','hl']) $(id).addEventListener('input',buildChips);
+function drawTitle(){
+  const size=+$('tsize').value; g.font=font(800,size,$('tf').value);
+  g.textBaseline='middle'; g.textAlign='left'; g.lineJoin='round'; g.lineWidth=+$('tstroke').value; g.strokeStyle=$('sc').value;
+  const words=titleWords().map((w,i)=>({t:w.replace(/\*/g,'').toUpperCase(),col:wc[i]||(/\*/.test(w)?$('hl').value:$('tc').value)}));
+  const lines=[[]]; let w0=0; const sp=g.measureText(' ').width;
+  for(const w of words){
+    const m=g.measureText(w.t).width;
+    if(w0+m>W-100&&lines.at(-1).length){lines.push([]);w0=0}
+    lines.at(-1).push({...w,m}); w0+=m+sp;
+  }
+  const top=0.07*H;
+  lines.forEach((ln,i)=>{
+    let x=(W-(ln.reduce((a,w)=>a+w.m+sp,0)-sp))/2; const y=top+i*size*1.05;
+    for(const w of ln){ if(g.lineWidth)g.strokeText(w.t,x,y); g.fillStyle=w.col; g.fillText(w.t,x,y); x+=w.m+sp; }
+  });
+}
+function draw(showCover){
+  g.setTransform(scale,0,0,scale,0,0);
+  g.fillStyle=$('bg').value; g.fillRect(0,0,W,H);
+  if(showCover&&cover){const r=Math.max(W/cover.width,H/cover.height);g.drawImage(cover,(W-cover.width*r)/2,(H-cover.height*r)/2,cover.width*r,cover.height*r);return}
+  drawTitle();
+  const vTop=$('vt').value/100*H, vH=$('vh').value/100*H;
+  if(active>=0&&clips[active]){
+    const v=clips[active].v, fill=$('fill').checked, k=fill?Math.max:Math.min, r=k(W/v.videoWidth,vH/v.videoHeight)||0, w=v.videoWidth*r, h=v.videoHeight*r;
+    g.save(); g.beginPath(); g.rect(0,vTop,W,vH); g.clip(); // crop overflow when filling
+    g.drawImage(v,(W-w)/2,vTop+(vH-h)/2,w,h); g.restore();
+  }
+  const ls=+$('lsize').value, start=$('lt').value/100*H, step=Math.min(ls*1.4,(H-start-70)/Math.max(clips.length,1));
+  g.font=font(800,ls,$('lf').value); g.textAlign='left'; g.textBaseline='middle'; g.lineWidth=ls/6; g.strokeStyle=$('sc').value;
+  clips.forEach((c,i)=>{
+    const y=start+i*step, on=i===active, num=`${i+1}.`, nw=g.measureText('10. ').width;
+    g.strokeText(num,40,y); g.fillStyle=$('rb').checked?`hsl(${i*360/Math.max(clips.length,1)} 90% 60%)`:(on?$('ac').value:$('lc').value); g.fillText(num,40,y);
+    const t=c.caption.toUpperCase(); g.strokeText(t,40+nw,y); g.fillStyle=on?$('ac').value:$('lc').value; g.fillText(t,40+nw,y);
+  });
+  if($('wm').value){g.font='700 36px Manrope,sans-serif';g.textAlign='center';g.fillStyle='rgba(255,255,255,.6)';g.fillText($('wm').value,W/2,H-40)}
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let stop=false, paused=false, exporting=false, cur=null;
+const ui=()=>{
+  $('play').textContent=busy&&!paused?'⏸ Pause':'▶ Play'; $('stop').disabled=!busy;
+  document.querySelectorAll('.item').forEach((d,i)=>d.classList.toggle('now',busy&&i===active));
+};
+// countdown: last rank plays first; `only` = solo one clip; loops until Stop unless `once`
+async function playAll({only=null,once=false}={}){
+  if(busy||!clips.length) return; busy=true; stop=false; paused=false; await ac.resume();
+  const list=only==null?clips.map((_,i)=>i).reverse():[only];
+  const total=list.reduce((a,i)=>a+clips[i].v.duration,0), bar=$('prog').firstElementChild;
+  do{
+    if(cover&&only==null){draw(true);for(let t=0;t<$('csec').value*10&&!stop;t++)await sleep(100)}
+    let done=0;
+    for(const i of list){
+      const c=clips[i]; if(stop||!c) break;
+      active=i; cur=c.v; ui(); cur.currentTime=0; await cur.play();
+      await new Promise(res=>{cur.onended=res;const tick=()=>{
+        if(stop){cur.pause();return res()}
+        draw();bar.style.width=(done+cur.currentTime)/total*100+'%';cur.ended?res():requestAnimationFrame(tick)};tick()});
+      done+=c.v.duration;
+    }
+  }while(!once&&$('loop').checked&&!stop&&clips.length);
+  cur=null; active=-1; busy=false; paused=false; draw(); bar.style.width='0'; ui();
+}
+function toggle(){
+  if(!busy){spk.gain.value=1;return playAll()}
+  if(exporting||!cur) return; // pausing would stall the recording
+  paused=!paused; paused?cur.pause():cur.play(); ui();
+}
+const stopAll=()=>{stop=true;if(cur)cur.pause()};
+async function solo(i){stopAll();while(busy)await sleep(20);spk.gain.value=1;playAll({only:i})}
+$('play').onclick=toggle; $('stop').onclick=stopAll; cv.onclick=toggle;
+document.addEventListener('keydown',e=>{
+  if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  if(e.code==='Space'){e.preventDefault();toggle()} else if(e.key==='Escape') stopAll();
+});
+$('exp').onclick=async()=>{
+  if(busy||!clips.length) return;
+  const mime=['video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));
+  const s=cv.captureStream(30);
+  if(!$('mute').checked) dest.stream.getAudioTracks().forEach(t=>s.addTrack(t));
+  const rec=new MediaRecorder(s,{mimeType:mime,videoBitsPerSecond:8e6*scale}), parts=[];
+  rec.ondataavailable=e=>parts.push(e.data);
+  const done=new Promise(r=>rec.onstop=r);
+  spk.gain.value=0; $('st').textContent='Exporting in real time — keep this tab open…';
+  rec.start(); exporting=true; await playAll({once:true}); exporting=false; rec.stop(); await done; spk.gain.value=1;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob(parts,{type:mime}));
+  a.download='ranking.'+(mime.includes('mp4')?'mp4':'webm'); a.click();
+  $('st').textContent='Done: '+a.download;
+};
+$('drop').onclick=e=>{if(e.target.id!=='file')$('file').click()};
+$('file').onchange=e=>{addFiles(e.target.files);e.target.value=''};
+$('cover').onchange=e=>{const f=e.target.files[0];if(!f){cover=null;return}const im=new Image();im.onload=()=>{cover=im;draw(true)};im.src=URL.createObjectURL(f)};
+$('getlink').onclick=async()=>{
+  const url=$('link').value.trim(); if(!url) return;
+  if(location.protocol==='file:') return alert('Link import needs the helper: run "node server.mjs" and open http://localhost:3000');
+  $('getlink').disabled=true; $('getlink').textContent='…';
+  try{
+    const r=await fetch('/dl?url='+encodeURIComponent(url));
+    if(!r.ok) throw new Error(await r.text());
+    addFiles([new File([await r.blob()],'link-'+(clips.length+1)+'.mp4',{type:'video/mp4'})]); $('link').value='';
+  }catch(e){alert(e.message)}
+  $('getlink').disabled=false; $('getlink').textContent='Add';
+};
+$('shuffle').onclick=()=>{clips.sort(()=>Math.random()-.5);render()};
+$('rev').onclick=()=>{clips.reverse();render()};
+$('clear').onclick=()=>{clips.length=0;render()};
+$('res').onchange=setSize;
+const dz=$('drop');
+dz.ondragover=e=>{e.preventDefault();dz.classList.add('on')}; dz.ondragleave=()=>dz.classList.remove('on');
+dz.ondrop=e=>{e.preventDefault();dz.classList.remove('on');addFiles(e.dataTransfer.files)};
+document.querySelectorAll('section input:not([type=file]),section select').forEach(i=>i.addEventListener('input',()=>draw()));
+document.fonts.ready.then(()=>FONTS.forEach(f=>document.fonts.load(`800 40px "${f}"`).then(()=>draw())));
+if(/github\.io$/.test(location.hostname)) $('linkrow').hidden=true; // link import needs the local server
+setSize(); buildChips(); render();
+</script></body></html>
